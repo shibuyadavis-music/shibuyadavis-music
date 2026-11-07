@@ -521,7 +521,9 @@ function ui(){$("ppIcon").innerHTML=playing?pa:pp;$("play").setAttribute("aria-l
 function stop(){if(mode==="audio")audio.pause();playing=false;ui()}
 function toggle(){
   if(mode==="audio"){
-    if(!actx&&location.protocol!=="file:"){try{actx=new (window.AudioContext||window.webkitAudioContext)();srcNode=actx.createMediaElementSource(audio);analyser=actx.createAnalyser();analyser.fftSize=256;freq=new Uint8Array(analyser.frequencyBinCount);srcNode.connect(analyser);analyser.connect(actx.destination)}catch(e){}}
+    try{if(navigator.audioSession)navigator.audioSession.type="playback"}catch(e){}
+    const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+    if(!actx&&location.protocol!=="file:"&&!isIOS){try{actx=new (window.AudioContext||window.webkitAudioContext)();srcNode=actx.createMediaElementSource(audio);analyser=actx.createAnalyser();analyser.fftSize=256;freq=new Uint8Array(analyser.frequencyBinCount);srcNode.connect(analyser);analyser.connect(actx.destination)}catch(e){}}
     if(actx&&actx.state==="suspended")actx.resume();
     if(audio.paused){const pr=audio.play();if(pr&&pr.catch)pr.catch(e=>{playing=false;ui();const s=document.getElementById("src");if(s){s.hidden=false;s.textContent="Playback blocked: "+e.name}});playing=true}else{audio.pause();playing=false}
   }else playing=!playing;
